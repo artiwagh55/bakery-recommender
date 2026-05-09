@@ -93,12 +93,17 @@ def generate_rules_simple(freq_itemsets, transactions, min_confidence=0.25):
     
     return pd.DataFrame(rules)
 
-# ==================== CUSTOM CSS FOR BEAUTIFUL UI ====================
+# ==================== CUSTOM CSS FOR BEAUTIFUL UI (Mobile Optimized) ====================
 st.markdown("""
 <style>
     /* Main background */
     .stApp {
         background: linear-gradient(135deg, #FFF8F0 0%, #FFE5D9 100%);
+    }
+    
+    /* Global text color - DARKER for mobile */
+    body, .stMarkdown, p, div, span {
+        color: #2C3E50 !important;
     }
     
     /* Product card styling */
@@ -121,6 +126,12 @@ st.markdown("""
         background: linear-gradient(135deg, #FFFFFF, #FFF5F5);
     }
     
+    .product-card h3 {
+        color: #2C3E50 !important;
+        font-weight: 700 !important;
+        font-size: 1.3rem !important;
+    }
+    
     /* Variety card for cake types */
     .variety-card {
         background: linear-gradient(135deg, #FFF5F5, #FFFFFF);
@@ -138,6 +149,11 @@ st.markdown("""
         box-shadow: 0 10px 25px rgba(255,107,107,0.3);
         border-color: #FF6B6B;
         background: white;
+    }
+    
+    .variety-card h4 {
+        color: #2C3E50 !important;
+        font-weight: 700 !important;
     }
     
     /* Recommendation card */
@@ -158,7 +174,12 @@ st.markdown("""
         background: white;
     }
     
-    /* Header styling */
+    .rec-card h3 {
+        color: #D35400 !important;
+        font-weight: 700 !important;
+    }
+    
+    /* Header styling - MORE VISIBLE */
     .fancy-header {
         font-size: 3.5rem;
         text-align: center;
@@ -166,16 +187,18 @@ st.markdown("""
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         font-weight: bold;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
     }
     
     /* Button styling */
     .stButton > button {
         background: linear-gradient(135deg, #FF6B6B, #FF8E53);
-        color: white;
+        color: white !important;
         border: none;
         border-radius: 50px;
         padding: 0.75rem 2rem;
-        font-weight: 600;
+        font-weight: 700 !important;
+        font-size: 1rem !important;
         transition: all 0.3s ease;
         width: 100%;
     }
@@ -188,31 +211,37 @@ st.markdown("""
     /* Badge styling */
     .badge-hot {
         background: linear-gradient(135deg, #FF6B6B, #FF8E53);
-        color: white;
+        color: white !important;
         padding: 5px 15px;
         border-radius: 25px;
-        font-size: 12px;
+        font-size: 13px;
+        font-weight: 600;
         display: inline-block;
         margin: 5px;
     }
     
     .category-badge {
         background: #4CAF50;
-        color: white;
+        color: white !important;
         padding: 3px 12px;
         border-radius: 15px;
-        font-size: 11px;
+        font-size: 12px;
+        font-weight: 600;
         display: inline-block;
     }
     
     /* Selected product highlight */
     .selected-highlight {
         background: linear-gradient(135deg, #FF6B6B, #FF8E53);
-        color: white;
+        color: white !important;
         border-radius: 20px;
         padding: 30px;
         text-align: center;
         animation: glow 2s ease infinite;
+    }
+    
+    .selected-highlight h2, .selected-highlight p {
+        color: white !important;
     }
     
     @keyframes glow {
@@ -232,12 +261,45 @@ st.markdown("""
     /* Price tag */
     .price-tag {
         background: #FF8E53;
-        color: white;
+        color: white !important;
         padding: 5px 12px;
         border-radius: 10px;
         display: inline-block;
         font-weight: bold;
         margin-top: 10px;
+    }
+    
+    /* Stats cards - BETTER VISIBILITY */
+    .stat-card {
+        background: white;
+        border-radius: 15px;
+        padding: 15px;
+        text-align: center;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    
+    .stat-card h2, .stat-card h3, .stat-card p {
+        color: #2C3E50 !important;
+    }
+    
+    /* Description text */
+    .description-text {
+        color: #555 !important;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+    
+    /* Mobile responsive improvements */
+    @media (max-width: 768px) {
+        .fancy-header {
+            font-size: 2rem !important;
+        }
+        .product-card h3, .rec-card h3 {
+            font-size: 1rem !important;
+        }
+        .badge-hot, .category-badge {
+            font-size: 10px !important;
+        }
     }
 </style>
 """, unsafe_allow_html=True)
@@ -418,7 +480,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Stats Row (rest of your code remains exactly the same from here)
+# Stats Row
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
