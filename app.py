@@ -626,4 +626,4 @@ st.markdown("""
     <p>🍰 <strong>Click & Discover</strong> - AI-Powered Bakery Recommendations 🥐</p>
     <p style="font-size: 0.8rem;">✨ Click Chocolate Cake to see 6+ varieties of chocolate cakes! ✨</p>
 </div>
-""", unsafe_allow_html=True)
+""", unsafe_allow_html=True) i want this code in app..py
