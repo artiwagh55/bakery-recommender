@@ -1,9 +1,8 @@
 import pandas as pd
 import streamlit as st
-from mlxtend.preprocessing import TransactionEncoder
-from mlxtend.frequent_patterns import apriori, association_rules
 from collections import Counter
 import random
+from itertools import combinations
 
 # Page configuration
 st.set_page_config(
@@ -12,6 +11,87 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+# ==================== SIMPLE APRIORI IMPLEMENTATION ====================
+def simple_apriori(transactions, min_support=0.05):
+    """Simple apriori implementation without mlxtend"""
+    item_counts = {}
+    for trans in transactions:
+        for item in trans:
+            item_counts[item] = item_counts.get(item, 0) + 1
+    
+    total_trans = len(transactions)
+    freq_itemsets = {}
+    
+    # Get frequent 1-itemsets
+    for item, count in item_counts.items():
+        support = count / total_trans
+        if support >= min_support:
+            freq_itemsets[frozenset([item])] = support
+    
+    # Get frequent 2-itemsets
+    items = list(item_counts.keys())
+    for i in range(len(items)):
+        for j in range(i+1, len(items)):
+            item1, item2 = items[i], items[j]
+            
+            count = 0
+            for trans in transactions:
+                if item1 in trans and item2 in trans:
+                    count += 1
+            
+            support = count / total_trans
+            if support >= min_support:
+                freq_itemsets[frozenset([item1, item2])] = support
+    
+    return freq_itemsets
+
+def generate_rules_simple(freq_itemsets, transactions, min_confidence=0.25):
+    """Generate association rules"""
+    rules = []
+    
+    for itemset, support in freq_itemsets.items():
+        if len(itemset) == 2:
+            items_list = list(itemset)
+            item_a, item_b = items_list[0], items_list[1]
+            
+            count_a = 0
+            count_b = 0
+            count_ab = 0
+            
+            for trans in transactions:
+                if item_a in trans:
+                    count_a += 1
+                if item_b in trans:
+                    count_b += 1
+                if item_a in trans and item_b in trans:
+                    count_ab += 1
+            
+            if count_a > 0:
+                confidence_ab = count_ab / count_a
+                if confidence_ab >= min_confidence:
+                    lift_ab = confidence_ab / (count_b / len(transactions)) if count_b > 0 else 0
+                    rules.append({
+                        'antecedents': frozenset([item_a]),
+                        'consequents': frozenset([item_b]),
+                        'confidence': confidence_ab,
+                        'lift': lift_ab,
+                        'support': support
+                    })
+            
+            if count_b > 0:
+                confidence_ba = count_ab / count_b
+                if confidence_ba >= min_confidence:
+                    lift_ba = confidence_ba / (count_a / len(transactions)) if count_a > 0 else 0
+                    rules.append({
+                        'antecedents': frozenset([item_b]),
+                        'consequents': frozenset([item_a]),
+                        'confidence': confidence_ba,
+                        'lift': lift_ba,
+                        'support': support
+                    })
+    
+    return pd.DataFrame(rules)
 
 # ==================== CUSTOM CSS FOR BEAUTIFUL UI ====================
 st.markdown("""
@@ -246,24 +326,15 @@ def create_product_database():
 data = load_transaction_data()
 transactions = data['Items'].apply(lambda x: [item.strip() for item in x.split(',')])
 
-# Transaction encoding
-te = TransactionEncoder()
-te_data = te.fit(transactions).transform(transactions)
-df = pd.DataFrame(te_data, columns=te.columns_)
-
-# Generate association rules
+# Generate association rules using simple implementation
 @st.cache_data
-def generate_rules(min_support=0.05, min_confidence=0.25):
-    try:
-        frequent_items = apriori(df, min_support=min_support, use_colnames=True)
-        if len(frequent_items) > 0:
-            rules = association_rules(frequent_items, metric="confidence", min_threshold=min_confidence)
-            return rules
-        return pd.DataFrame()
-    except:
-        return pd.DataFrame()
+def get_rules():
+    transactions_list = transactions.tolist()
+    freq_itemsets = simple_apriori(transactions_list, min_support=0.05)
+    rules_df = generate_rules_simple(freq_itemsets, transactions_list, min_confidence=0.25)
+    return rules_df
 
-rules = generate_rules()
+rules = get_rules()
 products_db = create_product_database()
 all_products = sorted(list(set(item for sublist in transactions for item in sublist)))
 
@@ -347,7 +418,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Stats Row
+# Stats Row (rest of your code remains exactly the same from here)
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
@@ -626,4 +697,4 @@ st.markdown("""
     <p>🍰 <strong>Click & Discover</strong> - AI-Powered Bakery Recommendations 🥐</p>
     <p style="font-size: 0.8rem;">✨ Click Chocolate Cake to see 6+ varieties of chocolate cakes! ✨</p>
 </div>
-""", unsafe_allow_html=True) i want this code in app..py
+""", unsafe_allow_html=True)
